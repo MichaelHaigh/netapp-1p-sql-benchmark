@@ -15,7 +15,7 @@ ad_cidr      = "10.101.0.0/24"
 
 # Compute Settings
 ad_machine_type  = "e2-standard-8"
-sql_machine_type = "e2-standard-8"
+sql_machine_type = "c3-standard-8"
 ad_image_type    = "windows-server-2022-dc-v20250813"
 sql_image_type   = "windows-server-2022-dc-v20250813"
 
