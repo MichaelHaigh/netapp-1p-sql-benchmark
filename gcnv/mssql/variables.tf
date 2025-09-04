@@ -63,6 +63,10 @@ variable "sql_image_type" {
   type        = string
   description = "The image type of the MS SQL instance"
 }
+variable "sql_download_url" {
+  type        = string
+  description = "The URL to download the MS SQL exe file"
+}
 
 # GCNV Settings
 variable "gcnv_service_level" {

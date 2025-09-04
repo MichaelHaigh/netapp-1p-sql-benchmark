@@ -18,6 +18,7 @@ ad_machine_type  = "e2-standard-8"
 sql_machine_type = "c3-standard-8"
 ad_image_type    = "windows-server-2022-dc-v20250813"
 sql_image_type   = "windows-server-2022-dc-v20250813"
+sql_download_url = "https://go.microsoft.com/fwlink/p/?linkid=2215158"
 
 # GCNV Settings
 gcnv_service_level = "standard"
