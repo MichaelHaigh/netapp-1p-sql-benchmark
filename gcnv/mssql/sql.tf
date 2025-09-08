@@ -182,7 +182,7 @@ resource "terraform_data" "sql_download_bits" {
   }
   provisioner "remote-exec" {
     inline = [
-      "pwsh.exe -File download-sql-bits.ps1 -Url ${var.sql_download_url}",
+      "pwsh.exe -File download-sql-bits.ps1 -SQLUrl ${var.sql_download_url} -CppUrl ${var.sql_cpp_url} -ODBCUrl ${var.sql_odbc_url} -CMDUrl ${var.sql_cmd_url}",
       "SQL2022-SSEI-Dev.exe /Q /Action=Download /MediaType=ISO /MediaPath=\"C:\\SQLMedia\\\"",
       "del download-sql-bits.ps1"
     ]

@@ -67,6 +67,18 @@ variable "sql_download_url" {
   type        = string
   description = "The URL to download the MS SQL exe file"
 }
+variable "sql_cpp_url" {
+  type        = string
+  description = "The URL to download the Visual C++ 2017 redistributable exe"
+}
+variable "sql_odbc_url" {
+  type        = string
+  description = "The URL to download the ODBC Driver"
+}
+variable "sql_cmd_url" {
+  type        = string
+  description = "The URL to download the SQL CMD exe file"
+}
 
 # GCNV Settings
 variable "gcnv_service_level" {

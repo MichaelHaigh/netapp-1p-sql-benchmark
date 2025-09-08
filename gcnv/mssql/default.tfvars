@@ -19,6 +19,9 @@ sql_machine_type = "c3-standard-8"
 ad_image_type    = "windows-server-2022-dc-v20250813"
 sql_image_type   = "windows-server-2022-dc-v20250813"
 sql_download_url = "https://go.microsoft.com/fwlink/p/?linkid=2215158"
+sql_cpp_url      = "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+sql_odbc_url     = "https://go.microsoft.com/fwlink/?linkid=2266337"
+sql_cmd_url      = "https://go.microsoft.com/fwlink/?linkid=2230791"
 
 # GCNV Settings
 gcnv_service_level = "standard"

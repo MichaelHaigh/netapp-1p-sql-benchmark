@@ -33,4 +33,19 @@ Start-Process -FilePath "$drive\setup.exe" -ArgumentList @(
   "/SQLTEMPDBLOGDIR=`"${tempdbDiskLetter}:\SQL\TempDB`""
 ) -Wait
 
+# Unmount the disk
 Dismount-DiskImage -ImagePath $iso
+
+# Install Visual C++ 2017 Redistributable
+Start-Process -FilePath "VC_redist.x64.exe" -ArgumentList @(
+  "/quiet",
+  "/norestart"
+) -Wait
+
+# Install ODBC Driver
+msiexec /i msodbcsql.msi /qn IACCEPTMSODBCSQLLICENSETERMS=YES
+sleep 5
+
+# Install SQL CMD exe
+msiexec /i MsSqlCmdLnUtils.msi /qn IACCEPTMSSQLCMDLNUTILSLICENSETERMS=YES
+sleep 5
