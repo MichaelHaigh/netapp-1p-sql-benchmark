@@ -31,7 +31,7 @@ resource "google_compute_instance" "sql_ad" {
   }
 }
 
-resource "terraform_data" "setup_ad" {
+resource "terraform_data" "ad_misc_settings" {
   triggers_replace = [
     google_compute_instance.sql_ad.instance_id
   ]
@@ -44,10 +44,39 @@ resource "terraform_data" "setup_ad" {
     private_key     = file(var.ssh_private_key)
     timeout         = "20m"
   }
+  provisioner "file" {
+    source      = "scripts/misc-settings.ps1"
+    destination = "misc-settings.ps1"
+  }
   provisioner "remote-exec" {
     inline = [
-      "echo Install-ADDSForest -DomainName ${terraform.workspace}.local -InstallDNS -SafeModeAdministratorPassword (ConvertTo-SecureString ${random_string.sql_ad_safemode_password.result} -AsPlainText -Force) -Force > setup-ad.ps1",
-      "pwsh.exe -File setup-ad.ps1",
+      "pwsh.exe -File misc-settings.ps1",
+      "del misc-settings.ps1"
+    ]
+  }
+}
+
+resource "terraform_data" "setup_ad" {
+  triggers_replace = [
+    google_compute_instance.sql_ad.instance_id
+  ]
+  depends_on = [terraform_data.ad_misc_settings]
+  connection {
+    target_platform = "windows"
+    type            = "ssh"
+    agent           = "false"
+    host            = google_compute_instance.sql_ad.network_interface[0].access_config[0].nat_ip
+    user            = var.ssh_username
+    private_key     = file(var.ssh_private_key)
+    timeout         = "5m"
+  }
+  provisioner "file" {
+    source      = "scripts/setup-ad.ps1"
+    destination = "setup-ad.ps1"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "pwsh.exe -File setup-ad.ps1 -Domain ${terraform.workspace}.local -Password \"${random_string.sql_ad_safemode_password.result}\"",
       "del setup-ad.ps1"
     ]
   }

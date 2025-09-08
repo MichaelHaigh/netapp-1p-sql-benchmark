@@ -84,19 +84,18 @@ resource "terraform_data" "sql_domain_join" {
     private_key     = file(var.ssh_private_key)
     timeout         = "20m"
   }
+  provisioner "file" {
+    source      = "scripts/domain-join.ps1"
+    destination = "domain-join.ps1"
+  }
   provisioner "remote-exec" {
-    # Enable password SSH access, create domain credential, join domain, and restart machine
     inline = [
       "echo Subsystem        sftp        sftp-server.exe> C:\\ProgramData\\ssh\\sshd_config",
       "echo Match Group administrators>> C:\\ProgramData\\ssh\\sshd_config",
       "echo        AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys>> C:\\ProgramData\\ssh\\sshd_config",
       "echo PubkeyAuthentication yes>> C:\\ProgramData\\ssh\\sshd_config",
       "echo AllowUsers ${terraform.workspace}\\administrator>> C:\\ProgramData\\ssh\\sshd_config",
-      "echo $username = \"Administrator@${terraform.workspace}.local\" > domain-join.ps1",
-      "echo $password = ConvertTo-SecureString ${random_string.sql_ad_admin_password.result} -AsPlainText -Force >> domain-join.ps1",
-      "echo $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist $username, $password >> domain-join.ps1",
-      "echo Add-Computer -DomainName \"${terraform.workspace}.local\" -Credential $cred -Force >> domain-join.ps1",
-      "pwsh.exe -File domain-join.ps1",
+      "pwsh.exe -File domain-join.ps1 -Domain ${terraform.workspace}.local -Password \"${random_string.sql_ad_admin_password.result}\"",
       "del domain-join.ps1",
       "shutdown /r /t 10"
     ]
@@ -125,20 +124,12 @@ resource "terraform_data" "sql_setup_disks" {
     password        = random_string.sql_ad_admin_password.result
     timeout         = "20m"
   }
+  provisioner "file" {
+    source      = "scripts/setup-disks.ps1"
+    destination = "setup-disks.ps1"
+  }
   provisioner "remote-exec" {
     inline = [
-      "echo $volumeLabel1 = Invoke-RestMethod -Headers @{\"Metadata-Flavor\" = \"Google\"} -Uri \"http://metadata.google.internal/computeMetadata/v1/instance/disks/1/device-name\"> setup-disks.ps1",
-      "echo $volumeLabel2 = Invoke-RestMethod -Headers @{\"Metadata-Flavor\" = \"Google\"} -Uri \"http://metadata.google.internal/computeMetadata/v1/instance/disks/2/device-name\">> setup-disks.ps1",
-      "echo $volumeLabel3 = Invoke-RestMethod -Headers @{\"Metadata-Flavor\" = \"Google\"} -Uri \"http://metadata.google.internal/computeMetadata/v1/instance/disks/3/device-name\">> setup-disks.ps1",
-      "echo $driveLetter1 = \"D\">> setup-disks.ps1",
-      "echo $driveLetter2 = \"E\">> setup-disks.ps1",
-      "echo $driveLetter3 = \"F\">> setup-disks.ps1",
-      "echo Initialize-Disk -Number 1 -PartitionStyle GPT>> setup-disks.ps1",
-      "echo Initialize-Disk -Number 2 -PartitionStyle GPT>> setup-disks.ps1",
-      "echo Initialize-Disk -Number 3 -PartitionStyle GPT>> setup-disks.ps1",
-      "echo New-Partition -DiskNumber 1 -UseMaximumSize -DriveLetter $driveLetter1 ^| Format-Volume -FileSystem NTFS -AllocationUnitSize 65536 -NewFileSystemLabel $volumeLabel1 -Confirm:$false>> setup-disks.ps1",
-      "echo New-Partition -DiskNumber 2 -UseMaximumSize -DriveLetter $driveLetter2 ^| Format-Volume -FileSystem NTFS -AllocationUnitSize 65536 -NewFileSystemLabel $volumeLabel2 -Confirm:$false>> setup-disks.ps1",
-      "echo New-Partition -DiskNumber 3 -UseMaximumSize -DriveLetter $driveLetter3 ^| Format-Volume -FileSystem NTFS -AllocationUnitSize 65536 -NewFileSystemLabel $volumeLabel3 -Confirm:$false>> setup-disks.ps1",
       "pwsh.exe -File setup-disks.ps1",
       "del setup-disks.ps1"
     ]
@@ -159,15 +150,12 @@ resource "terraform_data" "sql_misc_settings" {
     password        = random_string.sql_ad_admin_password.result
     timeout         = "5m"
   }
+  provisioner "file" {
+    source      = "scripts/misc-settings.ps1"
+    destination = "misc-settings.ps1"
+  }
   provisioner "remote-exec" {
-    # Disable windows updates, adjust for best performance, disable server manager startup
     inline = [
-      "echo $pause = (Get-Date).AddDays(35)> misc-settings.ps1",
-      "echo $pause = $pause.ToUniversalTime().ToString( \"yyyy-MM-ddTHH:mm:ssZ\" )>> misc-settings.ps1",
-      "echo Set-ItemProperty -Path \"HKLM:\\SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings\" -Name \"PauseUpdatesExpiryTime\" -Value $pause>> misc-settings.ps1",
-      "echo New-Item -Path \"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects\">> misc-settings.ps1",
-      "echo Set-ItemProperty -Path \"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects\" -Name VisualFXSetting -Value 2>> misc-settings.ps1",
-      "echo Get-ScheduledTask -TaskName ServerManager ^| Disable-ScheduledTask>> misc-settings.ps1",
       "pwsh.exe -File misc-settings.ps1",
       "del misc-settings.ps1"
     ]

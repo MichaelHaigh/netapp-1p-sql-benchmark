@@ -28,7 +28,7 @@ Start-Process -FilePath "$drive\setup.exe" -ArgumentList @(
   "/INSTALLSQLDATADIR=`"${dataDiskLetter}:\SQL`"",
   "/SQLUSERDBDIR=`"${dataDiskLetter}:\SQL\Data`"",
   "/SQLUSERDBLOGDIR=`"${logsDiskLetter}:\SQL\Logs`"",
-   "/SQLBACKUPDIR=`"${logsDiskLetter}:\SQL\Backup`"",
+  "/SQLBACKUPDIR=`"${logsDiskLetter}:\SQL\Backup`"",
   "/SQLTEMPDBDIR=`"${tempdbDiskLetter}:\SQL\TempDB`"",
   "/SQLTEMPDBLOGDIR=`"${tempdbDiskLetter}:\SQL\TempDB`""
 ) -Wait
